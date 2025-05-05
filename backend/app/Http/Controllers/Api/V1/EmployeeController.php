@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Models\Employee;
-use App\Models\EmployeeDetail;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreEmployeeRequest;
 use App\Http\Requests\UpdateEmployeeRequest;
+use Illuminate\Http\Request;
 
 /**
  * @OA\Tag(name="Employees")
@@ -22,10 +22,42 @@ class EmployeeController extends Controller
      *     @OA\Response(response=200, description="List of employees")
      * )
      */
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        $employees = Employee::with('detail', 'department')->paginate(20);
-        return response()->json($employees);
+        $query = Employee::with('detail', 'department');
+
+        if ($search = $request->get('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%$search%")
+                    ->orWhere('email', 'like', "%$search%");
+            });
+        }
+
+        if ($dept = $request->get('department_id')) {
+            $query->where('department_id', $dept);
+        }
+
+        if ($min = $request->get('min_salary')) {
+            $query->whereHas('detail', fn ($q) => $q->where('salary', '>=', $min));
+        }
+
+        if ($max = $request->get('max_salary')) {
+            $query->whereHas('detail', fn ($q) => $q->where('salary', '<=', $max));
+        }
+
+        if ($sort = $request->get('sort')) {
+            $order = $request->get('order', 'asc');
+            if ($sort === 'joined_date') {
+                $query->whereHas('detail')
+                    ->with('detail')
+                    ->join('employee_details', 'employees.id', '=', 'employee_details.employee_id')
+                    ->orderBy('employee_details.joined_date', $order);
+            } else {
+                $query->orderBy($sort, $order);
+            }
+        }
+
+        return response()->json($query->paginate(20));
     }
 
     /**

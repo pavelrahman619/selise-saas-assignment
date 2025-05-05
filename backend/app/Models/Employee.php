@@ -20,6 +20,11 @@ class Employee extends Model
         'department_id',
     ];
 
+    public function getRouteKeyName()
+    {
+        return 'id'; // default, but make sure the 'id' is a UUID in DB
+    }
+
     public function department()
     {
         return $this->belongsTo(Department::class);
