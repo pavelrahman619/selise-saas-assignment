@@ -1,7 +1,7 @@
 <template>
     <div class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center">
         <div class="bg-white p-6 w-96 rounded">
-            <h2 class="text-lg font-bold mb-4">{{ employee?.id ? 'Edit' : 'Create' }} Employee</h2>
+            <h2 class="text-lg font-bold mb-4">{{ employee?.employee_id ? 'Edit' : 'Create' }} Employee</h2>
             
             <form @submit.prevent="submit">
                 <!-- Name -->
@@ -54,7 +54,7 @@
                 <!-- Actions -->
                 <div class="flex justify-end gap-2">
                     <button class="btn bg-gray-300" @click="$emit('close')" type="button">Cancel</button>
-                    <button class="btn bg-blue-600 text-white" type="submit">{{ employee?.id ? 'Update' : 'Save' }}</button>
+                    <button class="btn bg-blue-600 text-white" type="submit">{{ employee?.employee_id ? 'Update' : 'Save' }}</button>
                 </div>
             </form>
         </div>
@@ -111,11 +111,11 @@ watch(() => props.employee, (e) => {
 }, { immediate: true })
 
 async function submit() {
-    console.log('Updating employee with ID:', props.employee?.id);
+    console.log('Updating employee with ID:', props.employee?.employee_id);
 
     try {
-        if (props.employee?.id) {
-            await employeeService.update(props.employee.id, form.value)
+        if (props.employee?.employee_id) {
+            await employeeService.update(props.employee.employee_id, form.value)
         } else {
             await employeeService.create(form.value)
         }

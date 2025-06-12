@@ -28,8 +28,7 @@ class EmployeeController extends Controller
 
         if ($search = $request->get('search')) {
             $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%$search%")
-                    ->orWhere('email', 'like', "%$search%");
+                $q->where('name', 'like', "%$search%")->orWhere('email', 'like', "%$search%");
             });
         }
 
@@ -38,20 +37,17 @@ class EmployeeController extends Controller
         }
 
         if ($min = $request->get('min_salary')) {
-            $query->whereHas('detail', fn ($q) => $q->where('salary', '>=', $min));
+            $query->whereHas('detail', fn($q) => $q->where('salary', '>=', $min));
         }
 
         if ($max = $request->get('max_salary')) {
-            $query->whereHas('detail', fn ($q) => $q->where('salary', '<=', $max));
+            $query->whereHas('detail', fn($q) => $q->where('salary', '<=', $max));
         }
 
         if ($sort = $request->get('sort')) {
             $order = $request->get('order', 'asc');
             if ($sort === 'joined_date') {
-                $query->whereHas('detail')
-                    ->with('detail')
-                    ->join('employee_details', 'employees.id', '=', 'employee_details.employee_id')
-                    ->orderBy('employee_details.joined_date', $order);
+                $query->whereHas('detail')->with('detail')->join('employee_details', 'employees.id', '=', 'employee_details.employee_id')->orderBy('employee_details.joined_date', $order);
             } else {
                 $query->orderBy($sort, $order);
             }
@@ -115,10 +111,22 @@ class EmployeeController extends Controller
     {
         $data = $request->validated();
 
-        $employee->update($data);
-        $employee->detail->update($data);
+        // Update Employee main table
+        $employee->update([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'department_id' => $data['department_id'],
+        ]);
 
-        return response()->json($employee->load('detail'));
+        // Update Employee detail table
+        $employee->detail()->update([
+            'designation' => $data['designation'],
+            'salary' => $data['salary'],
+            'address' => $data['address'],
+            'joined_date' => $data['joined_date'],
+        ]);
+
+        return response()->json($employee->load('detail', 'department'));
     }
 
     /**

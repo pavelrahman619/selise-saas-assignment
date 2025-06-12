@@ -29,7 +29,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="employee in store.employees" :key="employee.id">
+                <tr v-for="employee in store.employees" :key="employee.employee_id">
                     <td class="p-2">{{ employee.name }}</td>
                     <td class="p-2">{{ employee.email }}</td>
                     <td class="p-2">{{ employee.department?.name }}</td>
@@ -37,7 +37,7 @@
                     <td class="p-2">{{ employee.detail?.joined_date }}</td>
                     <td class="p-2 flex gap-2">
                         <button class="btn bg-yellow-400" @click="openForm(employee)">Edit</button>
-                        <button class="btn bg-red-500 text-white" @click="deleteEmployee(employee.id)">Delete</button>
+                        <button class="btn bg-red-500 text-white" @click="deleteEmployee(employee.employee_id)">Delete</button>
                     </td>
                 </tr>
             </tbody>
